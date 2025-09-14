@@ -19,7 +19,11 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'test-jenkinsfile-changes', credentialsId: 'git-pat', url: 'https://github.com/amitsinghs98/devops-task.git'
+                script {
+                    def branchToCheckout = env.BRANCH_NAME ?: 'main'
+                    echo "Checking out branch: ${branchToCheckout}"
+                    git branch: branchToCheckout, credentialsId: 'git-pat', url: 'https://github.com/amitsinghs98/devops-task.git'
+                }
             }
         }
 
@@ -74,27 +78,29 @@ pipeline {
         }
 
         stage('Terraform') {
-    steps {
-        dir('infra') {
-            withCredentials([aws(credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                sh '''
-                    terraform init -reconfigure -input=false -backend-config="key=ecs/${BRANCH_NAME}/terraform.tfstate"
-                    terraform plan -input=false -var="branch=${BRANCH_NAME}"
-                '''
-
-                script {
-                    if (env.BRANCH_NAME == 'main' && env.CHANGE_ID == null) {
+            steps {
+                dir('infra') {
+                    withCredentials([aws(credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                        script {
+                            echo "DEBUG: BRANCH_NAME=${env.BRANCH_NAME}, CHANGE_ID=${env.CHANGE_ID}"
+                        }
                         sh '''
-                            terraform apply -auto-approve -input=false -var="branch=${BRANCH_NAME}"
+                            terraform init -reconfigure -input=false -backend-config="key=ecs/${BRANCH_NAME}/terraform.tfstate"
+                            terraform plan -input=false -var="branch=${BRANCH_NAME}"
                         '''
-                    } else {
-                        echo "Skipping terraform apply (PR or dev branch)"
+
+                        script {
+                            if (env.BRANCH_NAME == 'main') {
+                                sh '''
+                                    terraform apply -auto-approve -input=false -var="branch=${BRANCH_NAME}"
+                                '''
+                            } else {
+                                echo "Skipping terraform apply (not main branch)"
+                            }
+                        }
                     }
                 }
             }
         }
-    }
-}
-
     }
 }
