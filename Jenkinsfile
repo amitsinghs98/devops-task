@@ -7,6 +7,7 @@ pipeline {
         ECR_REPO    = "539247483501.dkr.ecr.ap-south-1.amazonaws.com/logo-server-repo"
         IMAGE_NAME  = "logo-server"
         SONARQUBE   = "sonar-scanner" // Jenkins SonarQube config name
+        
     }
 
     triggers {
@@ -17,6 +18,8 @@ pipeline {
         stage('Checkout') {
             steps {
                   git branch: 'test-jenkinsfile-changes', credentialsId: 'git-pat', url: 'https://github.com/amitsinghs98/devops-task.git'
+                  sh 'pwd' 
+                  sh 'ls -l'
             }
         }
          stage('Build Docker Image') {
