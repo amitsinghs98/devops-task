@@ -14,13 +14,8 @@ pipeline {
     }
 
     triggers {
-    // Only allow triggering on main
-    when {
-        branch 'main'
+        githubPush() // Triggers on any push
     }
-    githubPush()
-}
-
 
     stages {
         stage('Checkout') {
