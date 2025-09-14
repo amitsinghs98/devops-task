@@ -9,20 +9,20 @@ pipeline {
         IMAGE_NAME        = "logo-server"
         SONARQUBE         = "sonar-scanner"
         SONARQUBE_TOKEN   = "sonar-scanner"
-        IMAGE_TAG         = "${env.BRANCH_NAME ?: 'unknown'}-${env.BUILD_NUMBER}"
+        BRANCH            = "${env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'main'}"
+        IMAGE_TAG         = "${BRANCH}-${env.BUILD_NUMBER}"
     }
 
     triggers {
-        githubPush() //trigger defined
+        githubPush()
     }
 
     stages {
         stage('Checkout') {
             steps {
                 script {
-                    def branchToCheckout = env.BRANCH_NAME ?: 'main'
-                    echo "Checking out branch: ${branchToCheckout}"
-                    git branch: branchToCheckout, credentialsId: 'git-pat', url: 'https://github.com/amitsinghs98/devops-task.git'
+                    echo "Checking out branch: ${BRANCH}"
+                    git branch: "${BRANCH}", credentialsId: 'git-pat', url: 'https://github.com/amitsinghs98/devops-task.git'
                 }
             }
         }
@@ -60,8 +60,8 @@ pipeline {
         stage('Push to ECR') {
             when {
                 anyOf {
-                    branch 'dev'
                     branch 'main'
+                    branch 'dev'
                     branch 'test-jenkinsfile-changes'
                 }
             }
@@ -82,17 +82,16 @@ pipeline {
                 dir('infra') {
                     withCredentials([aws(credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                         script {
-                            echo "DEBUG: BRANCH_NAME=${env.BRANCH_NAME}, CHANGE_ID=${env.CHANGE_ID}"
+                            echo "DEBUG: BRANCH=${BRANCH}, CHANGE_ID=${env.CHANGE_ID}"
                         }
                         sh '''
-                            terraform init -reconfigure -input=false -backend-config="key=ecs/${BRANCH_NAME}/terraform.tfstate"
-                            terraform plan -input=false -var="branch=${BRANCH_NAME}"
+                            terraform init -reconfigure -input=false -backend-config="key=ecs/${BRANCH}/terraform.tfstate"
+                            terraform plan -input=false -var="branch=${BRANCH}"
                         '''
-
                         script {
-                            if (env.BRANCH_NAME == 'main') {
+                            if (BRANCH == 'main') {
                                 sh '''
-                                    terraform apply -auto-approve -input=false -var="branch=${BRANCH_NAME}"
+                                    terraform apply -auto-approve -input=false -var="branch=${BRANCH}"
                                 '''
                             } else {
                                 echo "Skipping terraform apply (not main branch)"
