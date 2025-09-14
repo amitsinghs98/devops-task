@@ -74,26 +74,27 @@ pipeline {
         }
 
         stage('Terraform') {
-            steps {
-                dir('infra') {
-                    withCredentials([aws(credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        sh '''
-                            terraform init -input=false -backend-config="key=ecs/${BRANCH_NAME}/terraform.tfstate"
-                            terraform plan -input=false -var="branch=${BRANCH_NAME}"
-                        '''
+    steps {
+        dir('infra') {
+            withCredentials([aws(credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                sh '''
+                    terraform init -reconfigure -input=false -backend-config="key=ecs/${BRANCH_NAME}/terraform.tfstate"
+                    terraform plan -input=false -var="branch=${BRANCH_NAME}"
+                '''
 
-                        script {
-                            if (env.BRANCH_NAME == 'main' && env.CHANGE_ID == null) {
-                                sh '''
-                                    terraform apply -auto-approve -input=false -var="branch=${BRANCH_NAME}"
-                                '''
-                            } else {
-                                echo "Skipping terraform apply (PR or dev branch)"
-                            }
-                        }
+                script {
+                    if (env.BRANCH_NAME == 'main' && env.CHANGE_ID == null) {
+                        sh '''
+                            terraform apply -auto-approve -input=false -var="branch=${BRANCH_NAME}"
+                        '''
+                    } else {
+                        echo "Skipping terraform apply (PR or dev branch)"
                     }
                 }
             }
         }
+    }
+}
+
     }
 }
