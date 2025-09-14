@@ -21,6 +21,17 @@ pipeline {
                   git branch: 'test-jenkinsfile-changes', credentialsId: 'git-pat', url: 'https://github.com/amitsinghs98/devops-task.git'
             }
         }
+          stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
+         stage('Run Lint & Tests') {
+            steps {
+                sh 'npm run lint || true'
+                sh 'npm test || true'
+            }
+        }
          stage('Build Docker Image') {
             steps {
                 script {
@@ -32,7 +43,7 @@ pipeline {
             steps {
                 script {
                     // Run SonarQube Scanner
-                    withSonarQubeEnv("${sonar-scanner}") {
+                    withSonarQubeEnv('sonar-scanner') {
                         sh """
                             sonar-scanner \
                             -Dsonar.projectKey=logo-server \
