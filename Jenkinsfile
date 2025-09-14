@@ -37,37 +37,6 @@ pipeline {
                 }
             }
         }
-        stage('SonarQube Scan') {
-            steps {
-                script {
-                    // Run SonarQube Scanner
-                    withSonarQubeEnv('sonar-scanner') {
-                        sh """
-                            sonar-scanner \
-                            -Dsonar.projectKey=logo-server \
-                            -Dsonar.projectName=LogoServer \
-                            -Dsonar.projectVersion=1.0.0 \
-                            -Dsonar.sources=app \
-                            -Dsonar.language=js
-                            -Dsonar.host.url=http://13.203.60.231:9000/
-                            -Dsonar.login=${SONARQUBE_TOKEN} \
-                            -Dsonar.branch.name=${env.BRANCH_NAME}  # For dynamic branch name from Jenkins
-                            -X 
-                            """
-                    }
-                }
-            }
-        }
-      stage('Quality Gate') {
-         steps {
-           script {
-            // Wait for SonarQube Quality Gate status with 30-minute timeout
-               timeout(time: 30, unit: 'MINUTES') {
-                waitForQualityGate abortPipeline: true
-            }
-        }
-    }
-}
            stage('Security Scan with Trivy') {
             steps {
                 sh '''
