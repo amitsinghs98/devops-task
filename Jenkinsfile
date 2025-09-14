@@ -48,7 +48,7 @@ pipeline {
            stage('Security Scan with Trivy') {
             steps {
                 sh '''
-                trivy image --exit-code 0 --severity MEDIUM,HIGH,CRITICAL $IMAGE_NAME:$BRANCH_NAME
+                trivy image --exit-code 0 --severity MEDIUM,HIGH,CRITICAL $ECR_REPO:$IMAGE_TAG
                 '''
             }
         }
