@@ -160,11 +160,6 @@ pipeline {
 2. **If plan is clean**, a Pull Request is created → reviewed & merged into main.
 3. **Merge into main** → Jenkins runs `terraform apply` → infra + app deployed.
 4. **ECS Service pulls image from ECR** → Runs container in Fargate.
-5. **ALB exposes service** → Accessible via DNS.
-
-📊 **Pipeline Flow Diagram**  
-![Pipeline](./deployment-proof/pipeline.png)
-
 ---
 
 ## 🧹 Cleanup
