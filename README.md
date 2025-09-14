@@ -3,24 +3,18 @@
 # 🚀 Node.js App on AWS Fargate with CI/CD Pipeline
 Note:
 We are using a Multibranch Jenkins Pipeline with two branches:
-
-dev branch → Runs terraform plan only.
-
+**dev branch → Runs terraform plan only.*
 This helps us detect and fix any infrastructure errors safely before applying changes.
-
-main branch → Runs terraform apply.
-
+**main branch → Runs terraform apply.*
 Once a Pull Request (PR) from dev to main is merged, the pipeline automatically applies the changes.
-
 This is triggered by a GitHub webhook (push event), ensuring that deployments to AWS Fargate are automated and consistent.
-
 
 ````
 ````
 ## 🧰 Getting Started
 
 ## 📌 Architecture Overview
-
+![Architecture](./deployment-proof/deployment%20ecs.png)
 The architecture includes:
 
 - **Developer Workflow**
@@ -29,11 +23,15 @@ The architecture includes:
 
 - **Jenkins Pipeline**
   - **dev branch** → Runs `terraform plan` only (for validation & testing infra changes)
-  - **main branch** → Runs `terraform apply` (applies infra changes after PR merge)
+    ![Dev Branch CI/CD](./deployment-proof/Dev%20branch%20CICD%20Jenkins.png)
+  - **main branch** → Runs `terraform apply` (applies infra changes after PR merge)]
+    ![Main Branch CI/CD](./deployment-proof/Main%20branch%20CICD%20Jenkins.png)
 
 - **AWS Resources**
   - **ECR** – Store Docker images
   - **ECS Fargate** – Run containers without managing servers
+   ![ECR](./deployment-proof/ECR.png)
+   ![EC2](./deployment-proof/EC2%20machine%20for%20server.png)
   - **ALB (Application Load Balancer)** – Route traffic
   - **Terraform** – Manage Infrastructure as Code (IaC)
   - **IAM Roles** – Permissions for ECS tasks and execution
