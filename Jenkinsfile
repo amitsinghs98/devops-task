@@ -4,7 +4,7 @@ pipeline {
     environment {
         AWS_REGION  = "ap-south-1"
         AWS_CREDENTIALS = "aws-credentials" 
-        ACCOUNT_ID  = "539247483501"     // Static & safe to keep
+        ACCOUNT_ID  = "539247483501"     // Static & safe to keepe
         ECR_REPO    = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/logo-server-repo"
         IMAGE_NAME  = "logo-server"
         SONARQUBE   = "sonar-scanner" // Jenkins SonarQube config nam
