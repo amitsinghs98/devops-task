@@ -44,7 +44,7 @@ pipeline {
             }
             steps {
                  script {
-                    // Use AWS credentials from Jenkins Credentials store
+                    // Use AWS credentials from Jenkins Credentials storee
                     withAWS(credentials: 'aws-credentials') {
                         // Log in to Amazon ECR
                         sh """
