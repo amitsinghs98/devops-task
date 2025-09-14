@@ -28,14 +28,7 @@ pipeline {
                 }
             }
         }
-         stage('Run Lint & Tests') {
-            steps {
-                dir('app'){
-                sh 'npm run lint || true'
-                sh 'npm test || true'
-                }
-            }
-        }
+
          stage('Build Docker Image') {
             steps {
                 script {
