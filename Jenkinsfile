@@ -59,7 +59,6 @@ pipeline {
                 anyOf {
                     branch 'main'
                     branch 'dev'
-                    branch 'test-jenkinsfile-changes'
                 }
             }
             steps {
