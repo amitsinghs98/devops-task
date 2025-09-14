@@ -8,6 +8,7 @@ pipeline {
         ECR_REPO    = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/logo-server-repo"
         IMAGE_NAME  = "logo-server"
         SONARQUBE   = "sonar-scanner" // Jenkins SonarQube config nam
+        SONARQUBE_TOKEN = "sonar-scanner"
         IMAGE_TAG = "${env.BRANCH_NAME ?: 'unknown'}-${env.BUILD_NUMBER}"        
     }
 
