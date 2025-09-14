@@ -6,13 +6,14 @@ terraform {
     }
   }
 
-  backend "s3" {
-    bucket         = "devops-task-tfstate"
-    key            = "ecs/terraform.tfstate"
-    region         = "ap-south-1"
-    dynamodb_table = "terraform-locks"
-    encrypt        = true
-  }
+backend "s3" {
+  bucket = "devops-task-tfstate"
+  key    = "ecs/terraform.tfstate"
+  region = "ap-south-1"
+  table  = "terraform-locks"  
+  encrypt = true
+}
+
 }
 
 provider "aws" {
