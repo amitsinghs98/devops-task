@@ -51,6 +51,7 @@ pipeline {
                             -Dsonar.host.url=http://13.203.60.231:9000/
                             -Dsonar.login=${SONARQUBE_TOKEN} \
                             -Dsonar.branch.name=${env.BRANCH_NAME}  # For dynamic branch name from Jenkins
+                            -X 
                             """
                     }
                 }
