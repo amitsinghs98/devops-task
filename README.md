@@ -3,9 +3,10 @@
 # 🚀 Node.js App on AWS Fargate with CI/CD Pipeline
 Note:
 We are using a Multibranch Jenkins Pipeline with two branches:
-**dev branch → Runs terraform plan only.*
+**dev branch → Runs terraform plan only.* 
 This helps us detect and fix any infrastructure errors safely before applying changes.
-**main branch → Runs terraform apply.*
+**main branch → Runs terraform apply.* 
+![CI/CD Overview](deployment-proof/cicd%20.png)
 Once a Pull Request (PR) from dev to main is merged, the pipeline automatically applies the changes.
 This is triggered by a GitHub webhook (push event), ensuring that deployments to AWS Fargate are automated and consistent.
 
@@ -29,9 +30,10 @@ The architecture includes:
 
 - **AWS Resources**
   - **ECR** – Store Docker images
+  ![ECR](./deployment-proof/ECR.png)
   - **ECS Fargate** – Run containers without managing servers
-   ![ECR](./deployment-proof/ECR.png)
-   ![EC2](./deployment-proof/EC2%20machine%20for%20server.png)
+   ![ECS Deployment](deployment-proof/deployment%20ecs.png)
+     ![EC2](./deployment-proof/EC2%20machine%20for%20server.png)
   - **ALB (Application Load Balancer)** – Route traffic
   - **Terraform** – Manage Infrastructure as Code (IaC)
   - **IAM Roles** – Permissions for ECS tasks and execution
@@ -156,6 +158,7 @@ pipeline {
 
 ## 🔄 CI/CD Pipeline Flow
 
+![Multibranch CI/CD](deployment-proof/cicd%20multibranch.png)
 1. **Developer pushes to dev branch** → Jenkins runs `terraform plan` (dry run).
 2. **If plan is clean**, a Pull Request is created → reviewed & merged into main.
 3. **Merge into main** → Jenkins runs `terraform apply` → infra + app deployed.
@@ -198,6 +201,8 @@ terraform destroy -auto-approve
 * **AWS ECS (Fargate)** → Serverless container orchestration
 * **Terraform** → Infrastructure as Code (IaC)
 * **AWS CloudWatch** → Logs and monitoring for ECS tasks
+![CloudWatch Logs](deployment-proof/cloudwatch.png)
+![CloudWatch Metrics](deployment-proof/cloudwatch%20metrics.png)
 
 ---
 
