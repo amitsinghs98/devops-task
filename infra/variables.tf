@@ -15,6 +15,7 @@ variable "region" {
 
 variable "ecr_repo_url" {
   description = "ECR repository URL for ExpressJS app"
+  default = "539247483501.dkr.ecr.ap-south-1.amazonaws.com/logo-server-repo"
   type        = string
 }
 
