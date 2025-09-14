@@ -13,7 +13,7 @@ pipeline {
     }
 
     triggers {
-        githubPush()
+        githubPush() //trigger defined
     }
 
     stages {
