@@ -78,7 +78,8 @@ pipeline {
     steps {
         dir('infra') {
              withCredentials([aws(credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-            sh 'terraform init -input=false'
+            terraform init -input=false \
+            -backend-config="key=ecs/${env.BRANCH_NAME}/terraform.tfstate"
 
             sh """
             terraform plan -input=false \

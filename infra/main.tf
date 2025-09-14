@@ -7,9 +7,9 @@ terraform {
   }
   backend "s3" {
     bucket         = "devops-task-tfstate"
-    key            = "ecs/terraform.tfstate"
+    key            = "ecs/${var.branch}/terraform.tfstate"
     region         = "ap-south-1"
-    dynamodb_table = "terraform-locks"  # Correct argumentt
+    dynamodb_table = "terraform-locks"  
     encrypt        = true
   }
 }
