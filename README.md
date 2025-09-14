@@ -16,75 +16,183 @@ This is triggered by a GitHub webhook (push event), ensuring that deployments to
 
 
 ````
-## 📚 Table of Contents
-````
-- [Getting Started](#getting-started)
-- [How to Deploy](#how-to-deploy)
-- [🛠️ Tools & Services Used](#️-tools--services-used)
-- [📐 Architecture Diagram](#-architecture-diagram)
-- [⚡ Challenges Faced & Solutions](#-challenges-faced--solutions)
-- [🚀 Possible Improvements](#-possible-improvements)
-
 ````
 ## 🧰 Getting Started
 
-### Prerequisites
+## 📌 Architecture Overview
 
-- Node.js ≥ v16
-- Docker
-- Terraform ≥ v1.3
-- AWS CLI
-- Jenkins (with plugins: Git, Docker, AWS, Pipeline)
-- AWS account with access to ECS, ECR, CloudWatch, IAM, S3, DynamoDB
-````
-### Setup
+The architecture includes:
 
-#### 1. Clone the Repository
+- **Developer Workflow**
+  - Code pushed to GitHub → Webhook triggers Jenkins
+  - Multibranch pipeline (dev & main branches)
+
+- **Jenkins Pipeline**
+  - **dev branch** → Runs `terraform plan` only (for validation & testing infra changes)
+  - **main branch** → Runs `terraform apply` (applies infra changes after PR merge)
+
+- **AWS Resources**
+  - **ECR** – Store Docker images
+  - **ECS Fargate** – Run containers without managing servers
+  - **ALB (Application Load Balancer)** – Route traffic
+  - **Terraform** – Manage Infrastructure as Code (IaC)
+  - **IAM Roles** – Permissions for ECS tasks and execution
+
+📊 **Architecture Diagram**  
+![Architecture](./deployment-proof/architecture.png)
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1️⃣ Prerequisites
+
+- AWS Account with admin access
+- AWS CLI installed & configured (`aws configure`)
+- Terraform installed (>= v1.6)
+- Docker installed & running
+- Jenkins installed with:
+  - Multibranch Pipeline Plugin
+  - GitHub integration
+  - AWS Credentials Plugin
+
+---
+
+### 2️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/your-repo.git
-cd your-repo
-````
-
-#### 2. Configure AWS Credentials
-
-```bash
-aws configure
-```
-
-#### 3. Set Up Terraform Backend
-
-Create an S3 bucket and DynamoDB table for remote state and locking.
-
-#### 4. Initialize Terraform
-
-```bash
-cd terraform/
-terraform init
+git clone https://github.com/your-org/nodejs-fargate-app.git
+cd nodejs-fargate-app
 ```
 
 ---
 
-## 🚀 How to Deploy
+### 3️⃣ Configure AWS ECR
 
-### CI/CD Flow via Jenkins
+1. Create an ECR repo:
+   ```bash
+   aws ecr create-repository --repository-name logo-server-repo
+   ```
 
-1. **Push Code to GitHub**
-   GitHub webhook triggers the Jenkins pipeline.
-
-2. **Pipeline Steps (Automated)**
-
-   * Install dependencies
-   * Lint and analyze code with SonarQube
-   * Dockerize the application
-   * Run Trivy scan
-   * Push image to AWS ECR
-   * On `main` branch: Apply Terraform to deploy app
-
-3. **Access Application**
-   Once deployed, the Node.js app runs in ECS (Fargate) and is accessible via Load Balancer or public IP.
+2. Authenticate Docker with ECR:
+   ```bash
+   aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin <account_id>.dkr.ecr.ap-south-1.amazonaws.com
+   ```
 
 ---
+
+### 4️⃣ Build & Push Docker Image
+
+```bash
+docker build -t logo-server-repo .
+docker tag logo-server-repo:latest <account_id>.dkr.ecr.ap-south-1.amazonaws.com/logo-server-repo:latest
+docker push <account_id>.dkr.ecr.ap-south-1.amazonaws.com/logo-server-repo:latest
+```
+
+---
+
+### 5️⃣ Terraform Deployment
+
+1. Initialize Terraform:
+   ```bash
+   terraform init
+   ```
+
+2. Validate Infra (dev branch):
+   ```bash
+   terraform plan
+   ```
+
+3. Apply Infra (main branch):
+   ```bash
+   terraform apply -auto-approve
+   ```
+
+Terraform provisions:
+- ECS Cluster & Service (Fargate)
+- Task Definition (with correct ECR image)
+- ALB & Target Group
+- IAM Roles for ECS execution
+
+---
+
+### 6️⃣ Jenkins Multibranch Pipeline Setup
+
+1. Create a **Multibranch Pipeline** in Jenkins.
+2. Connect repository via GitHub.
+3. Add `Jenkinsfile` to repo:
+
+```groovy
+pipeline {
+    agent any
+    environment {
+        AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+        AWS_DEFAULT_REGION    = 'ap-south-1'
+    }
+    stages {
+        stage('Terraform Init') {
+            steps {
+                sh 'terraform init'
+            }
+        }
+        stage('Terraform Plan') {
+            when { branch 'dev' }
+            steps {
+                sh 'terraform plan'
+            }
+        }
+        stage('Terraform Apply') {
+            when { branch 'main' }
+            steps {
+                sh 'terraform apply -auto-approve'
+            }
+        }
+    }
+}
+```
+
+4. Configure **GitHub Webhook** for automatic builds.
+
+---
+
+## 🔄 CI/CD Pipeline Flow
+
+1. **Developer pushes to dev branch** → Jenkins runs `terraform plan` (dry run).
+2. **If plan is clean**, a Pull Request is created → reviewed & merged into main.
+3. **Merge into main** → Jenkins runs `terraform apply` → infra + app deployed.
+4. **ECS Service pulls image from ECR** → Runs container in Fargate.
+5. **ALB exposes service** → Accessible via DNS.
+
+📊 **Pipeline Flow Diagram**  
+![Pipeline](./deployment-proof/pipeline.png)
+
+---
+
+## 🧹 Cleanup
+
+To destroy resources:
+
+```bash
+terraform destroy -auto-approve
+```
+
+---
+
+## 📂 Project Structure
+
+```
+├── app/                 # Node.js application
+├── deployment-proof/    # Architecture & pipeline screenshots
+├── Jenkinsfile          # CI/CD pipeline definition
+├── main.tf              # Terraform configuration
+├── variables.tf         # Terraform variables
+├── outputs.tf           # Terraform outputs
+└── README.md            # Deployment guide
+```
+
+---
+
 
 ## 🛠️ Tools & Services Used
 
@@ -169,4 +277,5 @@ terraform init
   Enhance CI pipeline with automated test coverage reports.
 
 ---
+
 
