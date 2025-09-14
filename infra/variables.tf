@@ -23,3 +23,8 @@ variable "desired_count" {
   type        = number
   default     = 1
 }
+variable "build_number" {
+  type = string
+  description = "Build number for image tag"
+   default     = "latest"  
+}

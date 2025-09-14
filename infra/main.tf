@@ -142,13 +142,14 @@ resource "aws_ecs_task_definition" "app_task" {
   memory                   = "512"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
 
-  container_definitions = templatefile("${path.module}/ecs-taskdef.json.tpl", {
-    app_name     = var.app_name,
-    ecr_repo_url = var.ecr_repo_url,
-    branch       = var.branch,
-    region       = var.region,
-    log_group    = aws_cloudwatch_log_group.app_logs.name
-  })
+container_definitions = templatefile("${path.module}/ecs-taskdef.json.tpl", {
+  app_name     = var.app_name,
+  ecr_repo_url = var.ecr_repo_url,
+  branch       = var.branch,
+  build_number = var.build_number,
+  region       = var.region,
+  log_group    = aws_cloudwatch_log_group.app_logs.name
+})
 }
 
 # ---------------------

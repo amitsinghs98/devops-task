@@ -91,7 +91,8 @@ pipeline {
                         script {
                             if (BRANCH == 'main') {
                                 sh '''
-                                    terraform apply -auto-approve -input=false -var="branch=${BRANCH}"
+                                    terraform apply -auto-approve -input=false -var="branch=${BRANCH}" -var="build_number=${BUILD_NUMBER}"
+
                                 '''
                             } else {
                                 echo "Skipping terraform apply (not main branch)"

@@ -1,7 +1,7 @@
 [
   {
     "name": "${app_name}",
-    "image": "${ecr_repo_url}:${branch}",
+    "image": "${ecr_repo_url}:${branch}-${build_number}",
     "essential": true,
     "portMappings": [
       {
