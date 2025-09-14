@@ -72,6 +72,31 @@ pipeline {
                     }
                  }
             }
+
+        }
+       stage('Terraform') {
+    steps {
+        dir('infra') {
+            sh 'terraform init -input=false'
+
+            sh """
+            terraform plan -input=false \
+                -var="branch=${env.BRANCH_NAME}"
+            """
+
+            script {
+                if (env.BRANCH_NAME == "main" && env.CHANGE_ID == null) {
+                    sh """
+                    terraform apply -auto-approve -input=false \
+                        -var="branch=${env.BRANCH_NAME}"
+                    """
+                } else {
+                    echo "Skipping terraform apply (PR or dev branch)"
+                }
+            }
         }
     }
+}
+
+ }
 }
