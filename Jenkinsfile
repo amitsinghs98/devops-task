@@ -29,6 +29,14 @@ pipeline {
                 }
             }
         }
+        stage('Run Lint') {
+    steps {
+        dir('app') {
+            // Run the linting script defined in package.json
+            sh 'npm run lint || true'  // Continue even if linting fails
+        }
+    }
+}
 
          stage('Build Docker Image') {
             steps {
