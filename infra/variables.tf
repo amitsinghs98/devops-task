@@ -21,7 +21,6 @@ variable "ecr_repo_url" {
 variable "desired_count" {
   description = "Number of ECS tasks to run"
   type        = number
-  default     = 1
 }
 variable "build_number" {
   type = string

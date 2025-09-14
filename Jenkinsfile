@@ -79,28 +79,28 @@ pipeline {
 
         stage('Terraform') {
             steps {
-                dir('infra') {
-                    withCredentials([aws(credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        script {
-                            echo "DEBUG: BRANCH=${BRANCH}, CHANGE_ID=${env.CHANGE_ID}"
-                        }
-                        sh '''
-                            terraform init -reconfigure -input=false -backend-config="key=ecs/${BRANCH}/terraform.tfstate"
-                            terraform plan -input=false -var="branch=${BRANCH}"
-                        '''
-                        script {
-                            if (BRANCH == 'main') {
-                                sh '''
-                                    terraform apply -auto-approve -input=false -var="branch=${BRANCH}" -var="build_number=${BUILD_NUMBER}"
-
-                                '''
-                            } else {
-                                echo "Skipping terraform apply (not main branch)"
-                            }
-                        }
-                    }
+    dir('infra') {
+        withCredentials([aws(credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+            script {
+                echo "DEBUG: BRANCH=${BRANCH}, CHANGE_ID=${env.CHANGE_ID}"
+            }
+            sh '''
+                terraform init -reconfigure -input=false -backend-config="key=ecs/${BRANCH}/terraform.tfstate"
+                terraform plan -input=false -var="branch=${BRANCH}" -var="build_number=${BUILD_NUMBER}"
+            '''
+            script {
+                if (BRANCH == 'main') {
+                    sh '''
+                        terraform apply -auto-approve -input=false -var="branch=${BRANCH}" -var="build_number=${BUILD_NUMBER}"
+                    '''
+                } else {
+                    echo "Skipping terraform apply (not main branch)"
                 }
             }
         }
     }
 }
+
+            }
+        }
+    }
